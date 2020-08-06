@@ -1,1 +1,6 @@
-export const AN_ACTION = "AN_ACTION";
+export const NEW_MESSAGE = "NEW_MESSAGE";
+export const CONNECTED = "CONNECTED";
+export const STARTING_GAME = "STARTING_GAME";
+export const START_GAME_SUCCESS = "START_GAME_SUCCESS";
+export const START_GAME_FAIL = "START_GAME_FAIL";
+export const INVALID_USERNAME = "INVALID_USERNAME";

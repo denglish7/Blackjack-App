@@ -1,9 +1,25 @@
 import React from 'react';
-import { } from "../redux/actions";
+import {useSelector} from "react-redux";
+import {Container} from "reactstrap";
+import Main from "../components/Main";
+import JoinGame from "../components/JoinGame";
 
 const App = () => {
-  return (
-    <p>Put your components in here</p>
+
+    const isConnected = useSelector(state => state.isConnected);
+
+    return (
+        <Container>
+            {
+                isConnected ?
+                    <>
+                        <Main />
+                    </>
+                    :
+                    <JoinGame/>
+            }
+            
+        </Container>
   )
 }
 
