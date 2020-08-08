@@ -1,11 +1,16 @@
 import store from "./redux/store";
 import {
-    newMessage, 
+    newMessage,
     isConnected,
     startGameSuccess,
     invalidUsername,
     startGameError,
-    startingGame
+    startingGame,
+    setClientId,
+    requestBetById,
+    getPlayers,
+    bettingDone,
+    endGame
 } from "./redux/actions";
 
 /** CLIENT CONFIGURATION - connect to the server */
@@ -27,12 +32,29 @@ socket.on("all messages", result => {
     store.dispatch(newMessage(result));
 })
 
-socket.on("game joined", (id, players) => {
-    store.dispatch(isConnected(id, players));
+socket.on("game joined", (players, table) => {
+    store.dispatch(isConnected(players, table));
+})
+
+socket.on("get players", (players, dealer) => {
+    store.dispatch(getPlayers(players, dealer));
+})
+
+socket.on("request bet for player", (playerId) => {
+    console.log("requesting bet for ", playerId)
+    store.dispatch(requestBetById(playerId));
+})
+
+socket.on("betting done", () => {
+    store.dispatch(bettingDone());
 })
 
 socket.on("start game success", (players) => {
     store.dispatch(startGameSuccess(players));
+})
+
+socket.on("table full", () => {
+    console.log("table fulllllllll")
 })
 
 socket.on("starting game", () => {
@@ -49,6 +71,22 @@ socket.on("valid username", (username) => {
 
 socket.on("invalid username", () => {
     store.dispatch(invalidUsername());
+})
+
+socket.on("client id", (clientId) => {
+    store.dispatch(setClientId(clientId));
+})
+
+socket.on("player disconnected", (players, dealer) => {
+    store.dispatch(getPlayers(players, dealer));
+})
+
+socket.on("game ended", () => {
+    store.dispatch(endGame());
+})
+
+socket.on("table full", () =>{
+    // do this
 })
 
 // This process will allow different clients to have duplicate usernames! A real 
@@ -68,4 +106,13 @@ export const sendMessage = msg => {
 
 export const startGame = () => {
     socket.emit("start game");
+}
+
+export const placeBet = (playerId, newChips, newBet) => {
+    console.log("helloooooo")
+    socket.emit("new bet", playerId, newChips, newBet);
+}
+
+export const takeAction = (playerId, actionType) => {
+    socket.emit("new action", playerId, actionType);
 }

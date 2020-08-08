@@ -9,14 +9,11 @@ const ChatBox = () => {
 
     const dispatch = useDispatch();
 
-    const state = useSelector(state => state);
-
     return (
         <div className="chatbox">
             <Messages/>
             <Form/>
         </div>
-    
   )
 }
 

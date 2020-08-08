@@ -9,7 +9,7 @@ const App = () => {
     const isConnected = useSelector(state => state.isConnected);
 
     return (
-        <Container>
+        <div className="main">
             {
                 isConnected ?
                     <>
@@ -19,7 +19,7 @@ const App = () => {
                     <JoinGame/>
             }
             
-        </Container>
+        </div>
   )
 }
 
