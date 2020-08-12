@@ -1,27 +1,27 @@
 import React from "react";
 import { Media } from "reactstrap";
 import {useSelector} from "react-redux";
+import { startingGame } from "../redux/actions";
 
 const Hand = (props) => {
+    const INTERVAL = 15;
+    const getMargin = (index) => {
+        let margin = index * INTERVAL;
+        let marginString = margin + "px"
+        return marginString;
+    }
+
     const cards = props.cards.map((card, index) => {
-        if (index % 2 === 0) {
-            if (card.value === null) {
-                return <img className="even-card down-card" key={index} src={process.env.PUBLIC_URL + "/images/playing-card.png"} alt="card" />
-            }
-            return <img className="even-card" key={index} src={card.image} alt="card" />
-        } else {
-            if (card.value === null) {
-                return <img className="odd-card down-card" key={index} src={process.env.PUBLIC_URL + "/images/playing-card.png"} alt="card" />
-            }
-            return <img className="odd-card" key={index} src={card.image} alt="card" />
+        if (card.value === null) {
+            return <li key={index} style={{float: "right", marginRight: getMargin(index)}}><img className="card" key={index} src={process.env.PUBLIC_URL + "/images/playing-card.png"} alt="card" /></li>
         }
-        
+        return <li key={index} style={{float: "right", marginRight: getMargin(index)}}><img className="card" key={index} src={card.image} alt="card" /></li>
     })
     
     return (
-        <div className="hand">
+        <ul className="hand">
             {cards}
-        </div>
+        </ul>
     )
 }
 

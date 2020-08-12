@@ -7,14 +7,23 @@ import {
     INVALID_USERNAME,
     SET_CLIENT_ID,
     REQUEST_BET_BY_ID,
+    REQUEST_ACTION_BY_ID,
     GET_PLAYERS,
     BETTING_DONE,
+    PLAYER_BLACKJACK,
     GAME_OVER
 } from "./actionConstants";
 import {checkUsername, sendMessage, startGame, placeBet, takeAction} from "../client";
 
 export const requestBetById = (playerId) => ({
     type: REQUEST_BET_BY_ID,
+    payload: {
+        playerId
+    }
+})
+
+export const requestActionById = (playerId) => ({
+    type: REQUEST_ACTION_BY_ID,
     payload: {
         playerId
     }
@@ -42,6 +51,13 @@ export const getPlayers = (players, dealer) => ({
 
 export const bettingDone = () => ({
     type: BETTING_DONE
+})
+
+export const playerGotBlackjack = (playerId) => ({
+    type: PLAYER_BLACKJACK,
+    payload: {
+        playerId
+    }
 })
 
 

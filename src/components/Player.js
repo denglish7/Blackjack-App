@@ -2,6 +2,7 @@ import React, {useState} from 'react';
 import {useSelector, useDispatch} from "react-redux";
 import {Button, Container, Row, Col} from "reactstrap";
 import BetForm from "../components/BetForm";
+import ActionForm from "../components/ActionForm";
 import Hand from "../components/Hand";
 import { GAME_STATUS } from '../redux/store';
 
@@ -13,7 +14,6 @@ const Player = (props) => {
     const gameStatus = useSelector(state => state.gameStatus);
 
     const dispatch = useDispatch();
-    console.log("props.hand", props.hand);
 
     let style;
     if (playerId === playingPlayerId) {
@@ -22,17 +22,37 @@ const Player = (props) => {
         style = "not-my-turn";
     }
 
+    const getMessage = () => {
+        if (props.didBust === true) {
+            return <h3>Busted</h3>
+        } else if (props.hitBlackjack === true) {
+            return <h3>Blackjack!</h3>
+        } else {
+            return null;
+        }
+    }
+
     return (
         <div className="player-container" xs="6" sm="4">
             <p>{props.username}</p>
-
             {
-                props.id === playerId ? <p>{chips}</p> : <p>{players[props.id].chips}</p>
+                props.id === playerId ? <p>Remaining chips: {chips}</p> : <p>{players[props.id].chips}</p>
             }
-            
+
+            <div class="circle"></div>
+            { players[props.id].bet > 0 ? <div className="chip">{players[props.id].bet}</div> : null }
             {
                 props.id === playingPlayerId && props.id === playerId && gameStatus === GAME_STATUS.GETTING_BETS ?
                     <BetForm setChips={setChips} {...props} /> 
+                    : null
+            }
+
+            { getMessage() }
+
+
+            {
+                props.id === playingPlayerId && props.id === playerId && gameStatus === GAME_STATUS.TAKING_ACTIONS ?
+                    <ActionForm /> 
                     : null
             }
 

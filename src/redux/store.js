@@ -7,6 +7,7 @@ import {
     SET_CLIENT_ID, 
     INVALID_USERNAME, 
     REQUEST_BET_BY_ID,
+    REQUEST_ACTION_BY_ID,
     GET_PLAYERS,
     BETTING_DONE,
     GAME_OVER
@@ -28,7 +29,7 @@ export const GAME_STATUS = {
 
 export const ACTION_TYPE = {
     HIT: "HIT",
-    STAY: "STAY",
+    NEXT: "NEXT",
     SURRENDER: "SURRENDER",
     DOUBLE_DOWN: "DOUBLE_DOWN",
     SPLIT: "SPLIT"
@@ -47,7 +48,9 @@ const INITIAL_STATE = {
     action: null,
     dealer: {
         hand: [],
-        didBust: false
+        handValue: 0,
+        didBust: false,
+        hitBlackjack: false
     }
 }
 
@@ -69,6 +72,12 @@ const rootReducer = (state = INITIAL_STATE, action) => {
                 ...state,
                 gameStarted: true,
                 players: action.payload.players
+            }
+        case REQUEST_ACTION_BY_ID:
+            return {
+                ...state,
+                gameStatus: GAME_STATUS.TAKING_ACTIONS,
+                playingPlayerId: action.payload.playerId
             }
         case REQUEST_BET_BY_ID:
             return {

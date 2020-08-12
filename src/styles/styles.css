@@ -6,34 +6,64 @@ body {
     justify-content: center;
 }
 
+
+ul {
+    display: inline-block;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+li {
+    margin: 0;
+    padding: 0;
+    width: 5em;
+    height: 7em;
+    background: #eee;
+    border: 1px solid black;
+    border-radius: 5px;
+    margin-bottom: -80px;
+    clear: both;
+}
+
+li:last-child {
+    margin-bottom: 0;
+}
+
 .hand {
     position: absolute;
-    height:548px;
+    height:10em;
     margin-left:auto;
     margin-right:auto;
-    position:relative; /* and this has to be relative */
-    width:731px;
-}
+    position:relative;
+    width: 10em;
+}  
 
-.odd-card {
-    max-width: 65%;
-
-    left:50px; /* play around with this */
-    position:absolute;
-    top:90px; /* and play around with this */
-
-}
-
-
-.down-card {
-    max-width: 58%;
+.card {
+    width: 100%;
 }
 
 .chatbox {
+    position: absolute;
     width: 20%;
-    position: fixed;
-    right: 5px;
-    bottom: 5px;
+    height: 50%;
+    overflow: scroll;
+    right: 1em;
+    bottom: 12em;
+    background-color: white;
+    border-style: solid;
+    border-color: black;
+    border-radius: 10px;
+    padding: .5em;
+}
+
+.chatform {
+    position: absolute;
+    width: 20%;
+    height: 25%;
+    overflow: scroll;
+    right: 1em;
+    bottom: 1em;
     background-color: white;
     border-style: solid;
     border-color: black;

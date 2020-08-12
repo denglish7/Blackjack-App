@@ -12,7 +12,10 @@ const BetForm = (props) => {
     const dispatch = useDispatch();
 
     const addToBet = (amount) => {
-        if (totalBet + amount <= playerTotalChips) {
+        console.log("total bet", totalBet);
+        console.log("amount", amount);
+        console.log("playerTotalchips", playerTotalChips);
+        if (totalBet + amount <= playerTotalChips + totalBet) {
             setTotalBet(totalBet + amount);
             let newPlayerTotalChips = playerTotalChips - amount;
             props.setChips(newPlayerTotalChips);
@@ -27,6 +30,7 @@ const BetForm = (props) => {
         props.setChips(props.chips);
         setPlayerTotalChips(props.chips);
         setTotalBet(0);
+        setInvalidBet(false);
     }
 
     const placeBet = (newChips, newBet) => {

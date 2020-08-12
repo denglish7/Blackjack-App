@@ -24,7 +24,7 @@ const Form = () => {
     }
 
     return (
-        <>
+        <div className="chatform">
             <FormGroup>
                 <Label for="messageTxt">Your message:</Label>
                 <Input id="messageTxt" type="textarea"
@@ -35,7 +35,7 @@ const Form = () => {
                 onClick={sendMessageAndClearForm}>
                     Send
             </Button>
-        </>
+        </div>
     )
 }
 

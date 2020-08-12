@@ -8,12 +8,16 @@ const Dealer = () => {
     const dealer = useSelector(state => state.dealer);
     const dispatch = useDispatch();
 
+    console.log("dealer here", dealer);
+
     return (
         <Col className="player-container" xs="6" sm="4">
             <p>Dealer</p>
             {
                 dealer.hand.length > 0 ? <Hand cards={dealer.hand} /> : null
             }
+
+            {dealer.didBust === true ? <p>Dealer Busted!</p> : null}
 
         </Col>
     )

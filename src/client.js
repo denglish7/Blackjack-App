@@ -10,7 +10,9 @@ import {
     requestBetById,
     getPlayers,
     bettingDone,
-    endGame
+    endGame,
+    requestActionById,
+    playerGotBlackjack
 } from "./redux/actions";
 
 /** CLIENT CONFIGURATION - connect to the server */
@@ -37,12 +39,18 @@ socket.on("game joined", (players, table) => {
 })
 
 socket.on("get players", (players, dealer) => {
+    console.log("get playeres heres players", players);
+    console.log("get players heres dealer", dealer);
     store.dispatch(getPlayers(players, dealer));
 })
 
 socket.on("request bet for player", (playerId) => {
     console.log("requesting bet for ", playerId)
     store.dispatch(requestBetById(playerId));
+})
+
+socket.on("request action for player", (playerId) => {
+    store.dispatch(requestActionById(playerId))
 })
 
 socket.on("betting done", () => {
@@ -85,9 +93,19 @@ socket.on("game ended", () => {
     store.dispatch(endGame());
 })
 
+socket.on("dealer hit", (dealer) => {
+    socket.emit("check dealer hand", dealer);
+})
+
+socket.on("player got blackjack", (players) => {
+    store.dispatch(playerGotBlackjack(players))
+})
+
 socket.on("table full", () =>{
     // do this
 })
+
+
 
 // This process will allow different clients to have duplicate usernames! A real 
 // application should first check with the server to make sure the client's
