@@ -27,8 +27,6 @@ const Dealer = () => {
                 dealer.hand.length > 0 ? <Hand cards={dealer.hand} /> : null
             }
 
-
-
         </Col>
     )
 }

@@ -1,7 +1,8 @@
 import {createStore, applyMiddleware} from "redux";
 import thunkMiddleware from "redux-thunk";
 import {
-    NEW_MESSAGE, 
+    NEW_MESSAGE,
+    ONBOARDING_COMPLETE,
     CONNECTED, 
     START_GAME_SUCCESS, 
     SET_CLIENT_ID, 
@@ -47,6 +48,7 @@ export const ACTION_TYPE = {
 
 const INITIAL_STATE = {
     isConnected: false,
+    onboardingComplete: false,
     gameStarted: false,
     loginState: LOGIN_STATE.LOGGED_OUT,
     gameStatus: null,
@@ -66,6 +68,11 @@ const INITIAL_STATE = {
 
 const rootReducer = (state = INITIAL_STATE, action) => {
     switch (action.type) {
+        case ONBOARDING_COMPLETE:
+            return {
+                ...state,
+                onboardingComplete: true
+            }
         case BETTING_DONE: 
             return {
                 ...state,

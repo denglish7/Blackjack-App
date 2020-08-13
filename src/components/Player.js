@@ -13,14 +13,6 @@ const Player = (props) => {
     // const [chips, setChips] = useState(props.chips);
     const gameStatus = useSelector(state => state.gameStatus);
     const chips = players[playerId].chips;
-    const dispatch = useDispatch();
-
-    let style;
-    if (playerId === playingPlayerId) {
-        style = "my-turn";
-    } else {
-        style = "not-my-turn";
-    }
 
     const getMessage = () => {
         if (props.finalStatus === FINAL_STATUS.DID_BUST) {
@@ -50,14 +42,14 @@ const Player = (props) => {
                 }
             </Row>
             <Row className="row-container">
-                { 
+                {
                     players[props.id].bet !== 0 ? 
-                        <div className="circle">
+                        <div className="bet-area">
                             <div classname="chip">
                                 {players[props.id].bet}
                             </div>
                         </div>
-                            : <div className="circle"></div> 
+                            : <div className="bet-area"></div> 
                 }
                 {
                     props.id === playingPlayerId && props.id === playerId && gameStatus === GAME_STATUS.GETTING_BETS ?

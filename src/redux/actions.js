@@ -11,6 +11,7 @@ import {
     GET_PLAYERS,
     BETTING_DONE,
     PLAYER_BLACKJACK,
+    ONBOARDING_COMPLETE,
     GAME_OVER,
     END_HAND
 } from "./actionConstants";
@@ -21,6 +22,10 @@ export const requestBetById = (playerId) => ({
     payload: {
         playerId
     }
+})
+
+export const completeOnboarding = () => ({
+    type: ONBOARDING_COMPLETE
 })
 
 export const requestActionById = (playerId) => ({
