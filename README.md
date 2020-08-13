@@ -1,6 +1,6 @@
 # Final Project
 
-### Project hosted at https://pages.github.ccs.neu.edu/cs7580su20-seattle/daniel_english_final_project
+### Project hosted at https://pages.github.ccs.neu.edu/cs7580su20-seattle/daniel_english_finalproject
 
 ### I created a multiplayer blackjack game. Users can create a username to log in and are taken through a few onboarding slides that they can skip. Once in the main lobby, users can hit start game to play against the dealer or they can wait for other users to join as well. The game starts by prompting everyone to submit a bet by clicking on the available amounts. Once all users have placed their bets, the cards are dealt. Then all players take turns hitting, staying, or doubling down. Once all players are done, the dealer will hit until they reach at least 17. The game then completes by determining which players won and which players lost and allocating the chips. Users can also chat to each other using the chat box.
 
