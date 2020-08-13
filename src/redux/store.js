@@ -10,6 +10,7 @@ import {
     REQUEST_ACTION_BY_ID,
     GET_PLAYERS,
     BETTING_DONE,
+    END_HAND,
     GAME_OVER
 } from "./actionConstants";
 
@@ -24,7 +25,16 @@ export const LOGIN_STATE = {
 export const GAME_STATUS = {
     GETTING_BETS: "GETTING_BETS",
     DEALING_CARDS: "DEALING_CARDS",
-    TAKING_ACTIONS: "TAKING_ACTIONS"
+    TAKING_ACTIONS: "TAKING_ACTIONS",
+    HAND_OVER: "HAND_OVER"
+}
+
+export const FINAL_STATUS = {
+    DID_WIN: "DID_WIN",
+    DID_LOSE: "DID_LOSE",
+    DID_BUST: "DID_BUST",
+    HIT_BLACKJACK: "HIT_BLACKJACK",
+    DID_PUSH: "DID_PUSH"
 }
 
 export const ACTION_TYPE = {
@@ -101,6 +111,13 @@ const rootReducer = (state = INITIAL_STATE, action) => {
                 isConnected: true,
                 players: action.payload.players,
                 table: action.payload.table
+            }
+        case END_HAND:
+            return {
+                ...state,
+                players: action.payload.players,
+                dealer: action.payload.dealer,
+                gameStatus: GAME_STATUS.HAND_OVER
             }
         case GAME_OVER:
             return INITIAL_STATE;

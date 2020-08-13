@@ -41,8 +41,7 @@ const gameState = {
     dealer: {
         hand: [],
         handValue: 0,
-        didBust: false,
-        hitBlackjack: false
+        finalStatus: null
     }
 }
 
@@ -60,6 +59,15 @@ const CARD_VALUES = {
     "JACK": 10,
     "ACE": 11
 };
+
+
+const FINAL_STATUS = {
+    DID_WIN: "DID_WIN",
+    DID_LOSE: "DID_LOSE",
+    DID_BUST: "DID_BUST",
+    HIT_BLACKJACK: "HIT_BLACKJACK",
+    DID_PUSH: "DID_PUSH"
+}
 
 const DEALER = "DEALER";
 const TWENTY_ONE = 21;
@@ -110,7 +118,6 @@ const dealDownCard = () => {
             "code": null
         })
         gameState.deck.remaining = data.remaining;
-        checkTotal(DEALER);
         io.sockets.emit("get players", gameState.players, gameState.dealer);
     }).catch(error => {
         console.log(error);
@@ -118,31 +125,35 @@ const dealDownCard = () => {
     });
 }
 
-const checkForBlackjack = () => {
-    let dealer = gameState.dealer;
-    
-    for (let index in gameState.table) {
-        let playerId = gameState.table[index];
-        if (playerId !== DEALER) {
-            let player = gameState.players[gameState.table[index]];
-            if (dealer.hitBlackjack === true && player.hitBlackjack === true) {
-                playerPushed()
-            } else if (player.hitBlackjack === true && dealer.hitBlackjack === false) {
-                playerHitBlackjack();
-            }
+const drawCard = async () => {
+    drawCardFromDeck().then(async data => {
+        gameState.dealer.hand.push(data.cards[0]);
+        gameState.dealer.handValue = getHandValue(gameState.dealer.hand);
+        if (gameState.dealer.handValue < 17) {
+            await drawCard();
         }
-
-    }
+        console.log("play over in drawCard");
+        playOver();
+    }).catch(error => {
+        console.log(error);
+        io.sockets.emit("draw card failure");
+    });
 }
 
-const dealToDealer = (isHit = false) => {
-    drawCardFromDeck().then(data => {
+const dealToDealer = async (isHit = false) => {
+    drawCardFromDeck().then(async data => {
         gameState.dealer.hand.push(data.cards[0]);
         gameState.deck.remaining = data.remaining;
+        gameState.dealer.handValue = getHandValue(gameState.dealer.hand);
+        io.sockets.emit("get players", gameState.players, gameState.dealer);
         checkTotal(DEALER);
         if (isHit === true) {
-            console.log("is hit here");
-            io.sockets.emit("dealer hit", gameState.dealer)
+            if (gameState.dealer.handValue < 17) {
+                await drawCard();
+            } else {
+                console.log("play over in dealToDealer");
+                playOver();
+            }
         } else {
             checkForBlackjack();
         }
@@ -157,7 +168,23 @@ const dealToPlayer = (playerId) => {
         drawCardFromDeck().then(data => {
             gameState.players[playerId].hand.push(data.cards[0]);
             gameState.deck.remaining = data.remaining;
-            checkTotal(playerId);
+            gameState.players[playerId].handValue = getHandValue(gameState.players[playerId].hand);
+            if (gameState.players[playerId].handValue === TWENTY_ONE) {
+                // player hit 21
+                if (gameState.players[playerId].hand.length === 2) {
+                    // player hit blackjack
+                    playerHitBlackjack(playerId);
+                    io.sockets.emit("get players", gameState.players, gameState.dealer);
+                }
+                // io.sockets.emit("get players", gameState.players, gameState.dealer);
+                evaluateAction(playerId, ACTION_TYPE.NEXT);
+            } else if (gameState.players[playerId].handValue > TWENTY_ONE) {
+                gameState.players[playerId].finalStatus = FINAL_STATUS.DID_BUST;
+                playerBusted(playerId);
+                evaluateAction(playerId, ACTION_TYPE.NEXT);
+            }
+
+            io.sockets.emit("get players", gameState.players, gameState.dealer);
         }).catch(error => {
             console.log(error);
             io.sockets.emit("draw card failure");
@@ -185,58 +212,75 @@ const dealCards = () => {
 
 // Scoring methods
 
+const checkForBlackjack = () => {
+    let dealer = gameState.dealer;
+    console.log("checking for Blackjack")
+    if (dealer.handValue === TWENTY_ONE && dealer.hand.length === 2) {
+        gameState.dealer.finalStatus = FINAL_STATUS.HIT_BLACKJACK;
+    }
+
+    for (let index in gameState.table) {
+        let playerId = gameState.table[index];
+        if (playerId !== DEALER) {
+            let player = gameState.players[gameState.table[index]];
+            if (dealer.finalStatus === FINAL_STATUS.HIT_BLACKJACK && player.finalStatus === FINAL_STATUS.HIT_BLACKJACK) {
+                playerPushed(playerId);
+            } else if (player.finalStatus === FINAL_STATUS.HIT_BLACKJACK && dealer.finalStatus !== FINAL_STATUS.HIT_BLACKJACK) {
+                playerHitBlackjack(playerId);
+            }
+        }
+    }
+}
+
+const checkTotal = () => {
+    let hand = gameState.dealer.hand;
+    gameState.dealer.handValue = getHandValue(hand);
+    if (gameState.dealer.handValue === TWENTY_ONE && hand.length === 2) {
+        console.log("dealer hit blackjack");
+        gameState.dealer.finalStatus = FINAL_STATUS.HIT_BLACKJACK;
+        console.log("play over in checkTotal first");
+        playOver();
+    } else if (gameState.dealer.handValue > TWENTY_ONE) {
+        gameState.dealer.finalStatus = FINAL_STATUS.DID_BUST;
+        
+        console.log("play over in checkTotal second");
+        playOver();
+    }
+    io.sockets.emit("get players", gameState.players, gameState.dealer);
+}
+
+// final actions
+
+const playerBusted = (playerId) => {
+    gameState.players[playerId].bet = 0;
+    gameState.players[playerId].finalStatus = FINAL_STATUS.DID_BUST;
+    io.sockets.emit("get players", gameState.players, gameState.dealer);
+}
+
 const playerLost = (playerId) => {
     gameState.players[playerId].bet = 0;
+    gameState.players[playerId].finalStatus = FINAL_STATUS.DID_LOSE;
     io.sockets.emit("get players", gameState.players, gameState.dealer);
 }
 
 const playerPushed = (playerId) => {
-    gameState.players[playerId].didPush = true;
+    gameState.players[playerId].finalStatus = FINAL_STATUS.DID_PUSH;
     io.sockets.emit("get players", gameState.players, gameState.dealer);
 }
 
-const playerBeatDealer = (playerId) => {
+const playerWon = (playerId) => {
+    console.log("player wins here", gameState.players[playerId].handValue);
+    console.log("playwr wins dealer", gameState.dealer.handValue);
+    gameState.players[playerId].finalStatus = FINAL_STATUS.DID_WIN;
     gameState.players[playerId].chips += gameState.players[playerId].bet;
+    io.sockets.emit("get players", gameState.players, gameState.dealer);
 }
 
 const playerHitBlackjack = (playerId) => {
     let winnings = gameState.players[playerId].bet * BLACKJACK_MULTIPLIER;
     gameState.players[playerId].chips += winnings;
-}
-
-const checkTotal = (playerId) => {
-    let hand;
-    if (playerId === DEALER) {
-        hand = gameState.dealer.hand;
-    } else {
-        hand = gameState.players[playerId].hand;
-    }
-    if (playerId === DEALER) {
-        gameState.dealer.handValue = getHandValue(hand);
-        if (gameState.dealer.handValue === TWENTY_ONE && hand.length === 2) {
-            gameState.dealer.hitBlackjack = true;
-            playOver();
-        } else if (gameState.dealer.handValue > TWENTY_ONE) {
-            gameState.dealer.didBust = true;
-            playOver();
-        }
-        io.sockets.emit("get players", gameState.players, gameState.dealer);
-    } else {
-        gameState.players[playerId].handValue = getHandValue(hand);
-        if (gameState.players[playerId].handValue === TWENTY_ONE) {
-            if (gameState.players[playerId].hand.length === 2) {
-                gameState.players[playerId].hitBlackjack = true;
-                io.sockets.emit("get players", gameState.players, gameState.dealer);
-            }
-            io.sockets.emit("get players", gameState.players, gameState.dealer);
-            evaluateAction(playerId, ACTION_TYPE.NEXT);
-        } else if (gameState.players[playerId].handValue > TWENTY_ONE) {
-            gameState.players[playerId].didBust = true;
-            playerLost(playerId);
-            evaluateAction(playerId, ACTION_TYPE.NEXT);
-        }
-        io.sockets.emit("get players", gameState.players, gameState.dealer);
-    }
+    gameState.players[playerId].finalStatus = FINAL_STATUS.HIT_BLACKJACK;
+    io.sockets.emit("get players", gameState.players, gameState.dealer);
 }
 
 const getHandValue = (hand) => {
@@ -257,68 +301,93 @@ const getHandValue = (hand) => {
             total = total - 10
         }
     }
-
+    console.log("total", total);
     return total;
 }
 
 // Action methods
 
-const requestActionFromDealer = (reveal = false) => {
-    console.log("requesting dealer actions");
-
+const requestActionFromDealer = async (reveal = false) => {
+    console.log("requesting action from dealer");
     let hand = gameState.dealer.hand;
     hand.shift();
     hand.unshift(gameState.dealerDownCard);
     gameState.dealer.handValue = getHandValue(hand);
     io.sockets.emit("get players", gameState.players, gameState.dealer);
     if (gameState.dealer.handValue < 17 && reveal === false) {
-        console.log("dealer under 17");
-        dealToDealer(true);
-    }
-    playOver();
-}
-
-const dealerWon = () => {
-    for (let i = 0; i < gameState.table.length; i++) {
-        gameState.players[gameState.table[i]].bet = 0;
-
+        await dealToDealer(true);
+    } else {
+        playOver();
     }
 }
 
 const playOver = () => {
     console.log("game over")
-    console.log("table", gameState.table);
-    // if (gameState.dealer.didBust === true) {
-        
-    // }
-    
+    let dealerFinalStatus = gameState.dealer.finalStatus
+    if (gameState.dealer.handValue > TWENTY_ONE) {
+        gameState.dealer.finalStatus = FINAL_STATUS.DID_BUST;
+    }
+
+    if (dealerFinalStatus === FINAL_STATUS.DID_BUST) {
+        for (let i = 0; i < gameState.table.length - 1; i ++) {
+            let player = gameState.players[gameState.table[i]];
+            if (player.finalStatus !== FINAL_STATUS.DID_BUST) {
+                playerWon(gameState.table[i]);
+            }
+        }
+    } else if (dealerFinalStatus === null) {
+        for (let i = 0; i < gameState.table.length - 1; i ++) {
+            let player = gameState.players[gameState.table[i]];
+            if (player.finalStatus === null) {
+                let playerHandValue = player.handValue;
+                let dealerHandValue = gameState.dealer.handValue;
+                if (playerHandValue === dealerHandValue) {
+                    console.log("player pushed");
+                    console.log("scores player", playerHandValue);
+                    console.log("scores dealer", dealerHandValue);
+                    playerPushed(gameState.table[i]);
+                } else if (playerHandValue > dealerHandValue) {
+                    console.log("player won");
+                    console.log("scores player", playerHandValue);
+                    console.log("scores dealer", dealerHandValue);
+                    playerWon(gameState.table[i]);
+                } else if (playerHandValue < dealerHandValue) {
+                    console.log("player lost");
+                    console.log("scores player", playerHandValue);
+                    console.log("scores dealer", dealerHandValue);
+                    playerLost(gameState.table[i]);
+                }
+            }
+        }
+    }
+    io.sockets.emit("end hand", gameState.players, gameState.dealer);
 }
 
-const evaluateAction = (playerId, action) => {
+const evaluateAction = async (playerId, action) => {
     switch(action) {
         case ACTION_TYPE.HIT:
             if (playerId === DEALER) {
-                dealToDealer(false);
-                requestActionFromDealer();
+                await dealToDealer(true);
+                await requestActionFromDealer();
             } else {
                 dealToPlayer(playerId);
                 requestAction();
             }
-            
             break;
         case ACTION_TYPE.NEXT:
             gameState.currentTurnIndex++;
             if (gameState.table[gameState.currentTurnIndex] === DEALER) {
                 let allPlayersOut = true;
+
                 for (let index in gameState.table) {
                     if (gameState.table[index] !== DEALER){
-                        let didBust = gameState.players[gameState.table[index]].didBust;
-                        let hitBlackjack = gameState.players[gameState.table[index]].hitBlackjack;
-                        if (didBust === false && hitBlackjack === false) {
+                        let finalStatus = gameState.players[gameState.table[index]].finalStatus;
+                        if (finalStatus === null) {
                             allPlayersOut = false;
                         }
                     }
                 }
+                console.log("all players out", allPlayersOut);
                 if (allPlayersOut === true) {
                     // tells dealer not to draw
                     requestActionFromDealer(true);
@@ -329,6 +398,14 @@ const evaluateAction = (playerId, action) => {
             } else {
                 requestAction();
             }
+            break;
+        case ACTION_TYPE.DOUBLE_DOWN:
+            await dealToPlayer(playerId);
+            gameState.players[playerId].chips -= gameState.players[playerId].bet;
+            gameState.players[playerId].bet *= 2;
+
+            io.sockets.emit("get players", gameState.players, gameState.dealer);
+            evaluateAction(playerId, ACTION_TYPE.NEXT);
             break;
         default:
             return null;
@@ -346,7 +423,7 @@ const gameOver = () => {
     gameState.dealer = {
         hand: [],
         handValue: 0,
-        didBust: false
+        finalStatus: null
     };
     io.sockets.emit("game over");
 }
@@ -372,9 +449,7 @@ io.on("connection", client => {
             chips: 500,
             bet: 0,
             action: null,
-            didBust: false,
-            hitBlackjack: false,
-            didPush: false
+            finalStatus: null
         };
 
         if (Object.keys(gameState.players).length > 2) {
@@ -402,18 +477,16 @@ io.on("connection", client => {
     })
 
     client.on("check dealer hand", (dealer) => {
-        console.log("dealer hereereeeee", dealer)
-        if (dealer.handValue < 17) {
-            requestActionFromDealer();
-        } else {
-            playOver();
-        }
+        requestActionFromDealer();
     })
 
     client.on("new bet", (playerId, newChips, newBet) => {
         gameState.players[playerId].chips = newChips;
         gameState.players[playerId].bet = newBet;
         io.sockets.emit("get players", gameState.players, gameState.dealer);
+    })
+
+    client.on("submitting bet", () => {
         if (gameState.currentTurnIndex === gameState.table.length - 1) {
             io.sockets.emit("betting done");
             gameState.currentTurnIndex = 0;
@@ -433,16 +506,12 @@ io.on("connection", client => {
                     gameState.table.splice(i, 1); 
                 }
             }
-            console.log("someone disconnedcted");
-            console.log("players", gameState.players)
             if (Object.keys(gameState.players).length === 0) {
-                console.log("game ended")
+                gameState.table = [];
                 gameOver();
             } else {
                 io.sockets.emit("player disconnected", gameState.players, gameState.dealer);
             }
-            
-
         }
     })
 

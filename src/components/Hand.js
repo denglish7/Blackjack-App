@@ -19,9 +19,12 @@ const Hand = (props) => {
     })
     
     return (
-        <ul className="hand">
-            {cards}
-        </ul>
+        <div className="hand">
+            <ul>
+                {cards}
+            </ul>
+        </div>
+        
     )
 }
 

@@ -11,9 +11,10 @@ import {
     GET_PLAYERS,
     BETTING_DONE,
     PLAYER_BLACKJACK,
-    GAME_OVER
+    GAME_OVER,
+    END_HAND
 } from "./actionConstants";
-import {checkUsername, sendMessage, startGame, placeBet, takeAction} from "../client";
+import {checkUsername, sendMessage, startGame, submittingBet, placeBet, takeAction} from "../client";
 
 export const requestBetById = (playerId) => ({
     type: REQUEST_BET_BY_ID,
@@ -60,8 +61,6 @@ export const playerGotBlackjack = (playerId) => ({
     }
 })
 
-
-
 export const startGameSuccess = (players) => ({
     type: START_GAME_SUCCESS,
     payload: {
@@ -88,6 +87,15 @@ export const newMessage = messages => ({
     }
 })
 
+export const endHand = (players, dealer) => ({
+    type: END_HAND,
+    payload: {
+        players,
+        dealer
+    }
+})
+
+
 export const invalidUsername = () => ({
     type: INVALID_USERNAME
 })
@@ -107,6 +115,12 @@ export const sendToChat = msg => {
 export const start = () => {
     return dispatch => {
         startGame();
+    }
+}
+
+export const submitBet = () => {
+    return dispatch => {
+        submittingBet();
     }
 }
 

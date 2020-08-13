@@ -11,6 +11,7 @@ import {
     getPlayers,
     bettingDone,
     endGame,
+    endHand,
     requestActionById,
     playerGotBlackjack
 } from "./redux/actions";
@@ -105,6 +106,9 @@ socket.on("table full", () =>{
     // do this
 })
 
+socket.on("end hand", (players, dealer) => {
+    store.dispatch(endHand(players, dealer));
+})
 
 
 // This process will allow different clients to have duplicate usernames! A real 
@@ -126,9 +130,13 @@ export const startGame = () => {
     socket.emit("start game");
 }
 
+
 export const placeBet = (playerId, newChips, newBet) => {
-    console.log("helloooooo")
     socket.emit("new bet", playerId, newChips, newBet);
+}
+
+export const submittingBet = () => {
+    socket.emit("submitting bet");
 }
 
 export const takeAction = (playerId, actionType) => {

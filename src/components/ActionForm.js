@@ -4,8 +4,9 @@ import {Button} from "reactstrap";
 import {placeNewBet, userTakeAction} from "../redux/actions";
 import { ACTION_TYPE } from '../redux/store';
 
-const ActionForm = () => {
+const ActionForm = (props) => {
     const playerId = useSelector(state => state.playerId);
+    
     
     const dispatch = useDispatch();
 
@@ -18,6 +19,10 @@ const ActionForm = () => {
             <div className="chip-container">
                 <Button onClick={() => submitAction(ACTION_TYPE.HIT)}>HIT</Button>
                 <Button onClick={() => submitAction(ACTION_TYPE.NEXT)}>STAY</Button>
+                {
+                    props.handSize === 2 ? <Button onClick={() => submitAction(ACTION_TYPE.DOUBLE_DOWN)}>DOUBLE DOWN</Button> : null
+                }
+                
             </div>
             
         </div>

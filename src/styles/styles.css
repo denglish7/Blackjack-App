@@ -31,12 +31,8 @@ li:last-child {
 }
 
 .hand {
-    position: absolute;
-    height:10em;
-    margin-left:auto;
-    margin-right:auto;
-    position:relative;
-    width: 10em;
+    display: block;
+    height: 20em;
 }  
 
 .card {
@@ -117,7 +113,8 @@ li:last-child {
 }
 
 .player-container {
-    display: flex;
+    min-width: 10em;
+    min-height: 10em;
     align-items: center;
     justify-content: center;
 }

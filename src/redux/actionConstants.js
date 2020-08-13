@@ -10,4 +10,5 @@ export const REQUEST_ACTION_BY_ID = "REQUEST_ACTION_BY_ID";
 export const GET_PLAYERS = "GET_PLAYERS";
 export const BETTING_DONE = "BETTING_DONE";
 export const PLAYER_BLACKJACK = "PLAYER_BLACKJACK";
+export const END_HAND = "END_HAND";
 export const GAME_OVER = "GAME_OVER";
