@@ -1,5 +1,6 @@
 {
-  "name": "socket-template",
+  "name": "daniel_english_final_project",
+  "homepage": "https://pages.github.ccs.neu.edu/cs7580su20-seattle/daniel_english_final_project", 
   "version": "0.1.0",
   "private": true,
   "dependencies": {
