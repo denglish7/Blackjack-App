@@ -40,26 +40,36 @@ const Player = (props) => {
 
     return (
         <div className="player-container" xs="6" sm="4">
-            <Row>
-                <h3>{props.username}</h3>
+            <Row className="row-container">
+                <h3 className="username">{props.username}</h3>
+
+            </Row>
+            <Row className="row-container">
                 {
-                    props.id === playerId ? <p>hello{chips}</p> : <p>{players[props.id].chips}</p>
+                    props.id === playerId ? <p className="username">chips: {chips}</p> : <p className="username">{players[props.id].chips}</p>
                 }
             </Row>
-            <Row>
-                <div className="circle"></div>
-                { players[props.id].bet > 0 ? <div className="chip">{players[props.id].bet}</div> : null }
+            <Row className="row-container">
+                { 
+                    players[props.id].bet !== 0 ? 
+                        <div className="circle">
+                            <div classname="chip">
+                                {players[props.id].bet}
+                            </div>
+                        </div>
+                            : <div className="circle"></div> 
+                }
                 {
                     props.id === playingPlayerId && props.id === playerId && gameStatus === GAME_STATUS.GETTING_BETS ?
                         <BetForm {...props} /> 
                         : null
                 }
             </Row>
-            <Row>
+            <Row className="row-container">
                 { getMessage() }
             </Row>
 
-            <Row>
+            <Row className="row-container">
                 {
                     props.id === playingPlayerId && props.id === playerId &&
                         gameStatus === GAME_STATUS.TAKING_ACTIONS ?
@@ -68,11 +78,9 @@ const Player = (props) => {
                 }
             </Row>
 
-            <Row>
+            <Row className="row-container">
                 { props.hand.length > 0 ? <Hand cards={props.hand} /> : null }
             </Row>
-            
-            
         </div>
     )
 }

@@ -58,8 +58,8 @@ socket.on("betting done", () => {
     store.dispatch(bettingDone());
 })
 
-socket.on("start game success", (players) => {
-    store.dispatch(startGameSuccess(players));
+socket.on("start game success", (players, dealer) => {
+    store.dispatch(startGameSuccess(players, dealer));
 })
 
 socket.on("table full", () => {
@@ -90,7 +90,7 @@ socket.on("player disconnected", (players, dealer) => {
     store.dispatch(getPlayers(players, dealer));
 })
 
-socket.on("game ended", () => {
+socket.on("new game", () => {
     store.dispatch(endGame());
 })
 
@@ -130,6 +130,9 @@ export const startGame = () => {
     socket.emit("start game");
 }
 
+export const startNewHand = () => {
+    socket.emit("start new hand");
+}
 
 export const placeBet = (playerId, newChips, newBet) => {
     socket.emit("new bet", playerId, newChips, newBet);

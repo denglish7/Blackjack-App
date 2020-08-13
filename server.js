@@ -179,7 +179,6 @@ const dealToPlayer = (playerId) => {
                 // io.sockets.emit("get players", gameState.players, gameState.dealer);
                 evaluateAction(playerId, ACTION_TYPE.NEXT);
             } else if (gameState.players[playerId].handValue > TWENTY_ONE) {
-                gameState.players[playerId].finalStatus = FINAL_STATUS.DID_BUST;
                 playerBusted(playerId);
                 evaluateAction(playerId, ACTION_TYPE.NEXT);
             }
@@ -227,6 +226,7 @@ const checkForBlackjack = () => {
                 playerPushed(playerId);
             } else if (player.finalStatus === FINAL_STATUS.HIT_BLACKJACK && dealer.finalStatus !== FINAL_STATUS.HIT_BLACKJACK) {
                 playerHitBlackjack(playerId);
+                evaluateAction(playerId, ACTION_TYPE.NEXT);
             }
         }
     }
@@ -269,8 +269,8 @@ const playerPushed = (playerId) => {
 }
 
 const playerWon = (playerId) => {
-    console.log("player wins here", gameState.players[playerId].handValue);
-    console.log("playwr wins dealer", gameState.dealer.handValue);
+    console.log("chips", gameState.players[playerId].chips);
+    console.log("bet", gameState.players[playerId].bet);
     gameState.players[playerId].finalStatus = FINAL_STATUS.DID_WIN;
     gameState.players[playerId].chips += gameState.players[playerId].bet;
     io.sockets.emit("get players", gameState.players, gameState.dealer);
@@ -322,20 +322,19 @@ const requestActionFromDealer = async (reveal = false) => {
 }
 
 const playOver = () => {
-    console.log("game over")
-    let dealerFinalStatus = gameState.dealer.finalStatus
+
     if (gameState.dealer.handValue > TWENTY_ONE) {
         gameState.dealer.finalStatus = FINAL_STATUS.DID_BUST;
     }
 
-    if (dealerFinalStatus === FINAL_STATUS.DID_BUST) {
+    if (gameState.dealer.finalStatus === FINAL_STATUS.DID_BUST) {
         for (let i = 0; i < gameState.table.length - 1; i ++) {
             let player = gameState.players[gameState.table[i]];
             if (player.finalStatus !== FINAL_STATUS.DID_BUST) {
                 playerWon(gameState.table[i]);
             }
         }
-    } else if (dealerFinalStatus === null) {
+    } else if (gameState.dealer.finalStatus === null) {
         for (let i = 0; i < gameState.table.length - 1; i ++) {
             let player = gameState.players[gameState.table[i]];
             if (player.finalStatus === null) {
@@ -390,6 +389,7 @@ const evaluateAction = async (playerId, action) => {
                 console.log("all players out", allPlayersOut);
                 if (allPlayersOut === true) {
                     // tells dealer not to draw
+                    console.log("dealer don't drawwwww")
                     requestActionFromDealer(true);
                 } else {
                     requestActionFromDealer();
@@ -413,6 +413,11 @@ const evaluateAction = async (playerId, action) => {
 }
 
 const gameOver = () => {
+    for (let i = 0; i < gameState.table.length; i++) {
+        if (gameState.table[i] === DEALER) {
+            gameState.table.splice(i, 1); 
+        }
+    }
     gameState.gameStarted = false;
     gameState.deck = {
         deck_id: "",
@@ -425,7 +430,6 @@ const gameOver = () => {
         handValue: 0,
         finalStatus: null
     };
-    io.sockets.emit("game over");
 }
 
 io.on("connection", client => {
@@ -517,16 +521,21 @@ io.on("connection", client => {
 
     client.on("start game", () => {
         io.sockets.emit("starting game");
+        gameOver();
         gameState.gameStarted = true;
         for (let index in gameState.table) {
+            gameState.players[gameState.table[index]].hand = [];
+            gameState.players[gameState.table[index]].handValue = 0;
+            gameState.players[gameState.table[index]].action = null;
+            gameState.players[gameState.table[index]].finalStatus = null;
             gameState.players[gameState.table[index]].isPlaying = true;
         }
         getDeck().then(data => {
             gameState.deck.deck_id = data.deck_id;
             gameState.deck.remaining = data.remaining;
             gameState.gameStarted = true;
+            io.sockets.emit("start game success", gameState.players, gameState.dealer);
             requestBet();
-            io.sockets.emit("start game success", gameState.players);
         }).catch(error => {
             console.log(error);
             io.sockets.emit("start game failure");

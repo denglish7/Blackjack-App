@@ -1,6 +1,6 @@
 import {createStore, applyMiddleware} from "redux";
 import thunkMiddleware from "redux-thunk";
-import { 
+import {
     NEW_MESSAGE, 
     CONNECTED, 
     START_GAME_SUCCESS, 
@@ -77,11 +77,12 @@ const rootReducer = (state = INITIAL_STATE, action) => {
                 players: action.payload.players,
                 dealer: action.payload.dealer
             }
-        case START_GAME_SUCCESS: 
+        case START_GAME_SUCCESS:
             return {
                 ...state,
                 gameStarted: true,
-                players: action.payload.players
+                players: action.payload.players,
+                dealer: action.payload.dealer
             }
         case REQUEST_ACTION_BY_ID:
             return {

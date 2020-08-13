@@ -44,10 +44,9 @@ const BetForm = (props) => {
                 <div onClick={() => addToBet(25)} className="chip">25</div>
                 <div onClick={() => addToBet(50)} className="chip">50</div>
             </div>
-            <Button onClick={() => clearBet()}>Clear</Button>
-            <Button onClick={() => placeBet()}>Bet</Button>
+            <Button className="button" onClick={() => clearBet()}>Clear</Button>
+            <Button className="button" onClick={() => placeBet()}>Bet</Button>
         </div>
-
     )
 }
 

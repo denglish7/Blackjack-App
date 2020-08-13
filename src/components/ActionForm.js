@@ -17,14 +17,12 @@ const ActionForm = (props) => {
     return (
         <div>
             <div className="chip-container">
-                <Button onClick={() => submitAction(ACTION_TYPE.HIT)}>HIT</Button>
-                <Button onClick={() => submitAction(ACTION_TYPE.NEXT)}>STAY</Button>
+                <Button className="button" onClick={() => submitAction(ACTION_TYPE.HIT)}>HIT</Button>
+                <Button className="button" onClick={() => submitAction(ACTION_TYPE.NEXT)}>STAY</Button>
                 {
                     props.handSize === 2 ? <Button onClick={() => submitAction(ACTION_TYPE.DOUBLE_DOWN)}>DOUBLE DOWN</Button> : null
                 }
-                
             </div>
-            
         </div>
 
     )

@@ -14,7 +14,7 @@ import {
     GAME_OVER,
     END_HAND
 } from "./actionConstants";
-import {checkUsername, sendMessage, startGame, submittingBet, placeBet, takeAction} from "../client";
+import {checkUsername, sendMessage, startGame, submittingBet, placeBet, takeAction, startNewHand} from "../client";
 
 export const requestBetById = (playerId) => ({
     type: REQUEST_BET_BY_ID,
@@ -61,10 +61,11 @@ export const playerGotBlackjack = (playerId) => ({
     }
 })
 
-export const startGameSuccess = (players) => ({
+export const startGameSuccess = (players, dealer) => ({
     type: START_GAME_SUCCESS,
     payload: {
-        players
+        players,
+        dealer
     }
 })
 
@@ -133,6 +134,12 @@ export const placeNewBet = (playerId, newChips, newBet) => {
 export const userTakeAction = (playerId, actionType) => {
     return dispatch => {
         takeAction(playerId, actionType);
+    }
+}
+
+export const newHand = () => {
+    return dispatch => {
+        startNewHand();
     }
 }
 

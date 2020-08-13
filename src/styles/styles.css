@@ -32,7 +32,6 @@ li:last-child {
 
 .hand {
     display: block;
-    height: 20em;
 }  
 
 .card {
@@ -112,10 +111,36 @@ li:last-child {
     justify-content: center;
 }
 
+.button {
+    margin: 5px;
+}
 .player-container {
     min-width: 10em;
-    min-height: 10em;
+    min-height: 5em;
     align-items: center;
     justify-content: center;
 }
 
+.username {
+    display: block;
+}
+
+.circle {
+    -moz-border-radius: 50px/50px;
+    -webkit-border-radius: 50px 50px;
+    border-radius: 50px/50px;
+    border: solid 2px white;
+    width: 100px;
+    height: 100px;
+    display: inline-flex;
+    align-items: center; 
+    justify-content: center;
+  }
+
+.row-container {
+
+    align-self: center;
+    justify-content: center;
+    min-width: 100%;
+    min-height: 100%;
+}
