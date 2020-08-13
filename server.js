@@ -170,19 +170,15 @@ const dealToPlayer = (playerId) => {
             gameState.deck.remaining = data.remaining;
             gameState.players[playerId].handValue = getHandValue(gameState.players[playerId].hand);
             if (gameState.players[playerId].handValue === TWENTY_ONE) {
-                // player hit 21
                 if (gameState.players[playerId].hand.length === 2) {
-                    // player hit blackjack
                     playerHitBlackjack(playerId);
                     io.sockets.emit("get players", gameState.players, gameState.dealer);
                 }
-                // io.sockets.emit("get players", gameState.players, gameState.dealer);
                 evaluateAction(playerId, ACTION_TYPE.NEXT);
             } else if (gameState.players[playerId].handValue > TWENTY_ONE) {
                 playerBusted(playerId);
                 evaluateAction(playerId, ACTION_TYPE.NEXT);
             }
-
             io.sockets.emit("get players", gameState.players, gameState.dealer);
         }).catch(error => {
             console.log(error);
@@ -249,6 +245,28 @@ const checkTotal = () => {
     io.sockets.emit("get players", gameState.players, gameState.dealer);
 }
 
+const getHandValue = (hand) => {
+    let total = 0;
+    let hasAces = 0;
+    for (let index in hand) {
+        if (hand[index].value in CARD_VALUES) {
+            total += CARD_VALUES[hand[index].value];
+            if (hand[index].value === "ACE") {
+                hasAces++;
+            }
+        } else {
+            total += parseInt(hand[index].value);
+        }
+    }
+    for (let i = 0; i < hasAces; i++) {
+        if (total > TWENTY_ONE) {
+            total = total - 10
+        }
+    }
+    console.log("total", total);
+    return total;
+}
+
 // final actions
 
 const playerBusted = (playerId) => {
@@ -283,28 +301,6 @@ const playerHitBlackjack = (playerId) => {
     io.sockets.emit("get players", gameState.players, gameState.dealer);
 }
 
-const getHandValue = (hand) => {
-    let total = 0;
-    let hasAces = 0;
-    for (let index in hand) {
-        if (hand[index].value in CARD_VALUES) {
-            total += CARD_VALUES[hand[index].value];
-            if (hand[index].value === "ACE") {
-                hasAces++;
-            }
-        } else {
-            total += parseInt(hand[index].value);
-        }
-    }
-    for (let i = 0; i < hasAces; i++) {
-        if (total > TWENTY_ONE) {
-            total = total - 10
-        }
-    }
-    console.log("total", total);
-    return total;
-}
-
 // Action methods
 
 const requestActionFromDealer = async (reveal = false) => {
@@ -322,7 +318,6 @@ const requestActionFromDealer = async (reveal = false) => {
 }
 
 const playOver = () => {
-
     if (gameState.dealer.handValue > TWENTY_ONE) {
         gameState.dealer.finalStatus = FINAL_STATUS.DID_BUST;
     }
@@ -341,19 +336,10 @@ const playOver = () => {
                 let playerHandValue = player.handValue;
                 let dealerHandValue = gameState.dealer.handValue;
                 if (playerHandValue === dealerHandValue) {
-                    console.log("player pushed");
-                    console.log("scores player", playerHandValue);
-                    console.log("scores dealer", dealerHandValue);
                     playerPushed(gameState.table[i]);
                 } else if (playerHandValue > dealerHandValue) {
-                    console.log("player won");
-                    console.log("scores player", playerHandValue);
-                    console.log("scores dealer", dealerHandValue);
                     playerWon(gameState.table[i]);
                 } else if (playerHandValue < dealerHandValue) {
-                    console.log("player lost");
-                    console.log("scores player", playerHandValue);
-                    console.log("scores dealer", dealerHandValue);
                     playerLost(gameState.table[i]);
                 }
             }
@@ -386,24 +372,19 @@ const evaluateAction = async (playerId, action) => {
                         }
                     }
                 }
-                console.log("all players out", allPlayersOut);
                 if (allPlayersOut === true) {
-                    // tells dealer not to draw
-                    console.log("dealer don't drawwwww")
                     requestActionFromDealer(true);
                 } else {
                     requestActionFromDealer();
                 }
-                
             } else {
                 requestAction();
             }
             break;
         case ACTION_TYPE.DOUBLE_DOWN:
-            await dealToPlayer(playerId);
+            dealToPlayer(playerId);
             gameState.players[playerId].chips -= gameState.players[playerId].bet;
             gameState.players[playerId].bet *= 2;
-
             io.sockets.emit("get players", gameState.players, gameState.dealer);
             evaluateAction(playerId, ACTION_TYPE.NEXT);
             break;

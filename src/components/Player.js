@@ -1,6 +1,6 @@
-import React, {useState} from 'react';
-import {useSelector, useDispatch} from "react-redux";
-import {Button, Container, Row, Col} from "reactstrap";
+import React from 'react';
+import {useSelector} from "react-redux";
+import { Row } from "reactstrap";
 import BetForm from "../components/BetForm";
 import ActionForm from "../components/ActionForm";
 import Hand from "../components/Hand";
@@ -10,7 +10,6 @@ const Player = (props) => {
     const playingPlayerId = useSelector(state => state.playingPlayerId);
     const playerId = useSelector(state => state.playerId);
     const players = useSelector(state => state.players);
-    // const [chips, setChips] = useState(props.chips);
     const gameStatus = useSelector(state => state.gameStatus);
     const chips = players[playerId].chips;
 

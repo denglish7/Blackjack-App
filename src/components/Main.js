@@ -8,7 +8,6 @@ import { start } from "../redux/actions";
 import { GAME_STATUS } from '../redux/store';
 
 const Main = () => {
-    const state = useSelector(state => state);
     const players = useSelector(state => state.players);
     const playerId = useSelector(state => state.playerId);
     const username = players[playerId].username;

@@ -1,6 +1,6 @@
 import React from "react";
-import {useSelector, useDispatch} from "react-redux";
-import {Button, Container, Row, Col} from "reactstrap";
+import {useSelector} from "react-redux";
+import {Col} from "reactstrap";
 import Hand from "../components/Hand";
 import { FINAL_STATUS } from '../redux/store';
 

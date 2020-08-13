@@ -1,7 +1,4 @@
 import React from "react";
-import { Media } from "reactstrap";
-import {useSelector} from "react-redux";
-import { startingGame } from "../redux/actions";
 
 const Hand = (props) => {
     const INTERVAL = 15;
